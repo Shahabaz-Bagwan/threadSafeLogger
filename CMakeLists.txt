@@ -1,12 +1,12 @@
 # min. version of cmake required for this project
-cmake_minimum_required( VERSION 3.10)
+cmake_minimum_required(VERSION 3.10)
 
 # name of the project
-project(ProjectName)
+project(Logger)
 
 # Required to use vim as cpp ide
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/lib)
 
@@ -14,27 +14,26 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/lib)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# collect all the .cxx needed for executable 
-filE(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+# collect all the .cxx needed for executable
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
-add_subdirectory(thirdparty)
+add_subdirectory(thirdparty/fmt)
 add_subdirectory(example)
 
 # Create library
 add_library(${PROJECT_NAME}_shared SHARED ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME}_shared PUBLIC )
+target_link_libraries(${PROJECT_NAME}_shared PUBLIC fmt::fmt)
 
-target_include_directories( ${PROJECT_NAME}_shared PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
+target_include_directories(
+  ${PROJECT_NAME}_shared
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/fmt/include
+         ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_library(${PROJECT_NAME}_static STATIC ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME}_static PUBLIC )
+target_link_libraries(${PROJECT_NAME}_static PUBLIC fmt::fmt)
 
-target_include_directories( ${PROJECT_NAME}_static PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
+target_include_directories(
+  ${PROJECT_NAME}_static PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/fmt/include
+                                ${CMAKE_CURRENT_SOURCE_DIR}/include)

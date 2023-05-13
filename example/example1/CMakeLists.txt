@@ -13,4 +13,5 @@ add_executable(
 
 # Link dependencies
 target_link_libraries (${PROJECT_NAME} PRIVATE
+  Logger_shared
 )
