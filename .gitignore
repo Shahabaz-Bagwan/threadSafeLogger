@@ -3,6 +3,7 @@
 [Ll]ib/
 .vscode/
 input/
+compile_commands.json
 .cache/
 ipch/
 *.aps
