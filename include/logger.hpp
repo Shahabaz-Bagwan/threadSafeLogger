@@ -1,5 +1,6 @@
 #pragma once
 #include <chrono>
+#include <cstdio>
 #include <ctime>
 #include <fmt/core.h>
 #include <fstream>
@@ -18,13 +19,19 @@ enum class LogLevel
 class Logger
 {
 public:
-  Logger() : log_stream_( "log.txt", std::ios::app ) {}
+  Logger( std::string const& filename, LogLevel minLevel )
+    : log_stream_{ std::fopen( filename.c_str(), "a" ) }, minLevel_{ minLevel }
+  {
+  }
 
   void log( LogLevel level, const std::string& message );
 
+  ~Logger() { std::fclose( log_stream_ ); }
+
 private:
   std::mutex mutex_;
-  std::ofstream log_stream_;
+  std::FILE* log_stream_;
+  LogLevel minLevel_{ LogLevel::Info };
 
   static std::string levelToString( LogLevel level )
   {
