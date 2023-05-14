@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <ctime>
 #include <fmt/core.h>
+#include <fmt/chrono.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -48,4 +49,17 @@ private:
         return "";
     }
   }
+
+  // std::string getTimeStamp()
+  // {
+  //   auto time                            = std::chrono::system_clock::now();
+  //   std::chrono::duration< double > diff = time.time_since_epoch();
+  //   auto milliseconds =
+  //     std::chrono::duration_cast< std::chrono::milliseconds >( diff );
+  //   auto time_point = std::chrono::time_point< std::chrono::system_clock >(
+  //     std::chrono::milliseconds( milliseconds ) );
+  //   auto time_string =
+  //     fmt::format( "{:%Y-%m-%d %H:%M:%S.%f}", fmt::localtime( *time_point ) );
+  //   return time_string;
+  // }
 };
