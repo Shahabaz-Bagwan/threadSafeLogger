@@ -2,8 +2,9 @@
 #include <chrono>
 #include <cstdio>
 #include <ctime>
-#include <fmt/core.h>
 #include <fmt/chrono.h>
+#include <fmt/color.h>
+#include <fmt/core.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -25,7 +26,79 @@ public:
   {
   }
 
-  void log( LogLevel level, const std::string& message );
+  template < typename... Args >
+  void inline log( LogLevel level, Args&&... args )
+  {
+    if( level < minLevel_ ) {
+      return;
+    }
+    std::string color_code;
+    std::string level_string = levelToString( level );
+
+    using namespace std::chrono;
+    using namespace std::chrono;
+    auto now          = system_clock::now();
+    std::time_t now_c = system_clock::to_time_t( now );
+    auto ms =
+      duration_cast< std::chrono::milliseconds >( now.time_since_epoch() ) %
+      1000;
+    std::stringstream ss;
+    ss << std::put_time( std::localtime( &now_c ), "%d_%m_%Y_%H_%M_%S" );
+    ss << "." << std::setfill( '0' ) << std::setw( 3 ) << ms.count();
+    std::string timeString = ss.str();
+    std::lock_guard< std::mutex > lock( mutex_ );
+    std::string message{};
+    switch( level ) {
+      case LogLevel::Trace:
+        message =
+          fmt::format( fg( fmt::color::white ), "[{}] [TRACE]\t", timeString );
+        fmt::print( message );
+        message = fmt::format( fg( fmt::color::white ),
+                               std::forward< Args >( args )... );
+        fmt::print( message );
+        fmt::print( "\n" );
+        break;
+      case LogLevel::Info:
+        message =
+          fmt::format( fg( fmt::color::green ), "[{}] [INFO]\t", timeString );
+        fmt::print( message );
+        message = fmt::format( fg( fmt::color::green ),
+                               std::forward< Args >( args )... );
+        fmt::print( message );
+        fmt::print( "\n" );
+        break;
+      case LogLevel::Warning:
+        message = fmt::format( fg( fmt::color::yellow ), "[{}] [WARNING]\t",
+                               timeString );
+        fmt::print( message );
+        message = fmt::format( fg( fmt::color::yellow ),
+                               std::forward< Args >( args )... );
+        fmt::print( message );
+        fmt::print( "\n" );
+        break;
+      case LogLevel::Error:
+        message =
+          fmt::format( fg( fmt::color::red ), "[{}] [ERROR]\t", timeString );
+        fmt::print( message );
+        message =
+          fmt::format( fg( fmt::color::red ), std::forward< Args >( args )... );
+        fmt::print( message );
+        fmt::print( "\n" );
+        break;
+      default:
+        break;
+    }
+
+    // Write message to log file
+    if( log_stream_ ) {
+      message = fmt::format( "[{}] [{}]", timeString, levelToString( level ) );
+      fmt::print( log_stream_, message );
+      fmt::print( log_stream_, "\t" );
+      message = fmt::format( std::forward< Args >( args )... );
+      fmt::print( log_stream_, message );
+      fmt::print( log_stream_, "\n" );
+    }
+  }
 
   ~Logger() { std::fclose( log_stream_ ); }
 
@@ -49,17 +122,4 @@ private:
         return "";
     }
   }
-
-  // std::string getTimeStamp()
-  // {
-  //   auto time                            = std::chrono::system_clock::now();
-  //   std::chrono::duration< double > diff = time.time_since_epoch();
-  //   auto milliseconds =
-  //     std::chrono::duration_cast< std::chrono::milliseconds >( diff );
-  //   auto time_point = std::chrono::time_point< std::chrono::system_clock >(
-  //     std::chrono::milliseconds( milliseconds ) );
-  //   auto time_string =
-  //     fmt::format( "{:%Y-%m-%d %H:%M:%S.%f}", fmt::localtime( *time_point ) );
-  //   return time_string;
-  // }
 };

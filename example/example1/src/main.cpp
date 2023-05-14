@@ -22,23 +22,24 @@ static LogLevel stringToLevel( const std::string& levelStr )
 void logWorker( Logger& logger )
 {
   for( int i = 0; i < 10; i++ ) {
-    logger.log( LogLevel::Trace,
-                "Thread " +
-                  ( std::ostringstream() << std::this_thread::get_id() ).str() +
-                  " Trace message " + std::to_string( i ) );
-    logger.log( LogLevel::Info,
-                "Thread " +
-                  ( std::ostringstream() << std::this_thread::get_id() ).str() +
-                  " Trace message " + std::to_string( i ) );
+    logger.log( LogLevel::Trace, "{} {} {} {}", "Thread ",
+                ( std::ostringstream() << std::this_thread::get_id() ).str(),
+                " Trace message ", std::to_string( i ) );
+
+    logger.log( LogLevel::Info, "{} {} {} {}", "Thread ",
+                ( std::ostringstream() << std::this_thread::get_id() ).str(),
+                " info message ", std::to_string( i ) );
+
     std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
-    logger.log( LogLevel::Warning,
-                "Thread " +
-                  ( std::ostringstream() << std::this_thread::get_id() ).str() +
-                  " Trace message " + std::to_string( i ) );
-    logger.log( LogLevel::Error,
-                "Thread " +
-                  ( std::ostringstream() << std::this_thread::get_id() ).str() +
-                  " Trace message " + std::to_string( i ) );
+
+    logger.log( LogLevel::Warning, "{} {} {} {}", "Thread ",
+                ( std::ostringstream() << std::this_thread::get_id() ).str(),
+                " warning message ", std::to_string( i ) );
+
+    logger.log( LogLevel::Error, "{} {} {} {}", "Thread ",
+                ( std::ostringstream() << std::this_thread::get_id() ).str(),
+                " error message ", std::to_string( i ) );
+
     std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
   }
 }
@@ -51,7 +52,9 @@ int main( int argc, char* argv[] )
     return 1;
   }
   Logger logger( "log.txt", stringToLevel( argv[ 1 ] ) );
-  logger.log( LogLevel::Trace, "This is a trace message." );
+
+  logger.log( LogLevel::Trace, "{} {} {}", "This is a trace message.", "hello",
+              "hi" );
   logger.log( LogLevel::Info, "This is an info message." );
   std::thread t1( logWorker, std::ref( logger ) );
   logger.log( LogLevel::Warning, "This is a warning message." );
