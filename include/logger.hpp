@@ -5,6 +5,7 @@
 #include <fmt/chrono.h>
 #include <fmt/color.h>
 #include <fmt/core.h>
+#include <fmt/os.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -22,7 +23,10 @@ class Logger
 {
 public:
   Logger( std::string const& filename, LogLevel minLevel )
-    : log_stream_{ std::fopen( filename.c_str(), "a" ) }, minLevel_{ minLevel }
+    : output_{ fmt::output_file( filename.c_str(), fmt::file::WRONLY |
+                                                     fmt::file::CREATE |
+                                                     fmt::file::APPEND ) },
+      minLevel_{ minLevel }
   {
   }
 
@@ -47,42 +51,29 @@ public:
     ss << "." << std::setfill( '0' ) << std::setw( 3 ) << ms.count();
     std::string timeString = ss.str();
     std::lock_guard< std::mutex > lock( mutex_ );
-    std::string message{};
     switch( level ) {
       case LogLevel::Trace:
-        message =
-          fmt::format( fg( fmt::color::white ), "[{}] [TRACE]\t", timeString );
-        fmt::print( message );
-        message = fmt::format( fg( fmt::color::white ),
-                               std::forward< Args >( args )... );
-        fmt::print( message );
+        fmt::print( fg( fmt::color::white ), "[{}] [{:^7}] ", timeString,
+                    "TRACE" );
+        fmt::print( fg( fmt::color::white ), std::forward< Args >( args )... );
         fmt::print( "\n" );
         break;
       case LogLevel::Info:
-        message =
-          fmt::format( fg( fmt::color::green ), "[{}] [INFO]\t", timeString );
-        fmt::print( message );
-        message = fmt::format( fg( fmt::color::green ),
-                               std::forward< Args >( args )... );
-        fmt::print( message );
+        fmt::print( fg( fmt::color::green ), "[{}] [{:^7}] ", timeString,
+                    "INFO" );
+        fmt::print( fg( fmt::color::green ), std::forward< Args >( args )... );
         fmt::print( "\n" );
         break;
       case LogLevel::Warning:
-        message = fmt::format( fg( fmt::color::yellow ), "[{}] [WARNING]\t",
-                               timeString );
-        fmt::print( message );
-        message = fmt::format( fg( fmt::color::yellow ),
-                               std::forward< Args >( args )... );
-        fmt::print( message );
+        fmt::print( fg( fmt::color::yellow ), "[{}] [{:^7}] ", timeString,
+                    "WARNING" );
+        fmt::print( fg( fmt::color::yellow ), std::forward< Args >( args )... );
         fmt::print( "\n" );
         break;
       case LogLevel::Error:
-        message =
-          fmt::format( fg( fmt::color::red ), "[{}] [ERROR]\t", timeString );
-        fmt::print( message );
-        message =
-          fmt::format( fg( fmt::color::red ), std::forward< Args >( args )... );
-        fmt::print( message );
+        fmt::print( fg( fmt::color::red ), "[{}] [{:^7}] ", timeString,
+                    "ERROR" );
+        fmt::print( fg( fmt::color::red ), std::forward< Args >( args )... );
         fmt::print( "\n" );
         break;
       default:
@@ -90,21 +81,16 @@ public:
     }
 
     // Write message to log file
-    if( log_stream_ ) {
-      message = fmt::format( "[{}] [{}]", timeString, levelToString( level ) );
-      fmt::print( log_stream_, message );
-      fmt::print( log_stream_, "\t" );
-      message = fmt::format( std::forward< Args >( args )... );
-      fmt::print( log_stream_, message );
-      fmt::print( log_stream_, "\n" );
-    }
+    output_.print( "[{}] [{:^7}] ", timeString, levelToString( level ) );
+    output_.print( std::forward< Args >( args )... );
+    output_.print( "\n" );
   }
 
-  ~Logger() { std::fclose( log_stream_ ); }
+  ~Logger() { output_.close(); }
 
 private:
   std::mutex mutex_;
-  std::FILE* log_stream_;
+  fmt::ostream output_;
   LogLevel minLevel_{ LogLevel::Info };
 
   static std::string levelToString( LogLevel level )

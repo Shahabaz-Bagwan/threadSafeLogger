@@ -22,23 +22,23 @@ static LogLevel stringToLevel( const std::string& levelStr )
 void logWorker( Logger& logger )
 {
   for( int i = 0; i < 10; i++ ) {
-    logger.log( LogLevel::Trace, "{} {} {} {}", "Thread ",
+    logger.log( LogLevel::Trace, "{} {} {} {}", "Thread",
                 ( std::ostringstream() << std::this_thread::get_id() ).str(),
-                " Trace message ", std::to_string( i ) );
+                "Trace message", i );
 
-    logger.log( LogLevel::Info, "{} {} {} {}", "Thread ",
+    logger.log( LogLevel::Info, "{} {} {} {}", "Thread",
                 ( std::ostringstream() << std::this_thread::get_id() ).str(),
-                " info message ", std::to_string( i ) );
+                "info message", i );
 
     std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
 
-    logger.log( LogLevel::Warning, "{} {} {} {}", "Thread ",
+    logger.log( LogLevel::Warning, "{} {} {} {}", "Thread",
                 ( std::ostringstream() << std::this_thread::get_id() ).str(),
-                " warning message ", std::to_string( i ) );
+                "warning message", i );
 
-    logger.log( LogLevel::Error, "{} {} {} {}", "Thread ",
+    logger.log( LogLevel::Error, "{} {} {} {} {}", "Thread",
                 ( std::ostringstream() << std::this_thread::get_id() ).str(),
-                " error message ", std::to_string( i ) );
+                "error message", i, 3.14 );
 
     std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
   }
@@ -48,7 +48,8 @@ int main( int argc, char* argv[] )
 {
   using namespace std;
   if( argc < 2 ) {
-    std::cout << "Please provide input argument" << std::endl;
+    std::cout << "Please provide input argument {trace, info, warning, error}"
+              << std::endl;
     return 1;
   }
   Logger logger( "log.txt", stringToLevel( argv[ 1 ] ) );
