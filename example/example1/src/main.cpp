@@ -21,26 +21,41 @@ static LogLevel stringToLevel( const std::string& levelStr )
 
 void logWorker( Logger& logger )
 {
-  for( int i = 0; i < 10; i++ ) {
+  for( int i = 0; i < 5; i++ ) {
     logger.log( LogLevel::Trace, "{} {} {} {}", "Thread",
                 ( std::ostringstream() << std::this_thread::get_id() ).str(),
                 "Trace message", i );
+
+    std::cout << "COUT Thread "
+              << ( std::ostringstream() << std::this_thread::get_id() ).str()
+              << " Trace message " << i << std::endl;
 
     logger.log( LogLevel::Info, "{} {} {} {}", "Thread",
                 ( std::ostringstream() << std::this_thread::get_id() ).str(),
                 "info message", i );
 
+    std::cout << "COUT Thread "
+              << ( std::ostringstream() << std::this_thread::get_id() ).str()
+              << " info message " << i << std::endl;
+
     std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+
+    std::cout << "COUT Thread "
+              << ( std::ostringstream() << std::this_thread::get_id() ).str()
+              << " warning message " << i << std::endl;
 
     logger.log( LogLevel::Warning, "{} {} {} {}", "Thread",
                 ( std::ostringstream() << std::this_thread::get_id() ).str(),
                 "warning message", i );
 
+    std::cout << "COUT Thread "
+              << ( std::ostringstream() << std::this_thread::get_id() ).str()
+              << " error message " << i << std::endl;
     logger.log( LogLevel::Error, "{} {} {} {} {}", "Thread",
                 ( std::ostringstream() << std::this_thread::get_id() ).str(),
                 "error message", i, 3.14 );
 
-    std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+    std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
   }
 }
 
